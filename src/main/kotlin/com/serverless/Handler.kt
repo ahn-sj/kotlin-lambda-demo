@@ -4,7 +4,6 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.serverless.Handler.TokenAuthorizerContext
 
-//https://www.githubstatus.com/api/v2/status.json
 class Handler : RequestHandler<TokenAuthorizerContext, Map<String, Any>> {
 
     private val validServiceKey = "tally"
