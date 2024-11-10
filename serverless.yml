@@ -25,8 +25,8 @@ provider:
   runtime: java17
 
 # you can overwrite defaults here
-#  stage: dev
-#  region: us-east-1
+  stage: dev
+  region: ap-northeast-2
 
 # you can add statements to the Lambda function's IAM Role here
 #  iam:
@@ -52,7 +52,7 @@ provider:
 
 # you can add packaging information here
 package:
-  artifact: build/libs/hello-dev-all.jar
+  artifact: build/libs/auth-demo-handler-0.0.1.jar
 
 functions:
   hello:

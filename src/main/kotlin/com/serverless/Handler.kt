@@ -2,20 +2,44 @@ package com.serverless
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
-import org.apache.logging.log4j.LogManager
+import com.serverless.Handler.TokenAuthorizerContext
 
-class Handler:RequestHandler<Map<String, Any>, ApiGatewayResponse> {
-  override fun handleRequest(input:Map<String, Any>, context:Context):ApiGatewayResponse {
-    LOG.info("received: " + input.keys.toString())
+//https://www.githubstatus.com/api/v2/status.json
+class Handler : RequestHandler<TokenAuthorizerContext, Map<String, Any>> {
 
-    return ApiGatewayResponse.build {
-      statusCode = 200
-      objectBody = HelloResponse("Go Serverless v1.x! Your Kotlin function executed successfully!", input)
-      headers = mapOf("X-Powered-By" to "AWS Lambda & serverless")
+    private val validServiceKey = "tally"
+
+    override fun handleRequest(
+        input: TokenAuthorizerContext,
+        context: Context
+    ): Map<String, Any> {
+        val effect = when (input.authorizationToken) {
+            validServiceKey -> "Allow"
+            else -> "Deny"
+        }
+        return generatePolicy(effect, input.methodArn.orEmpty(), principalId = "user")
     }
-  }
 
-  companion object {
-    private val LOG = LogManager.getLogger(Handler::class.java)
-  }
+    private fun generatePolicy(
+        effect: String,
+        resource: String, principalId: String
+    ) = mapOf(
+        "principalId" to principalId,
+        "policyDocument" to mapOf(
+            "Version" to "2012-10-17",
+            "Statement" to listOf(
+                mapOf(
+                    "Action" to "execute-api:Invoke",
+                    "Effect" to effect,
+                    "Resource" to resource
+                )
+            )
+        )
+    )
+
+    data class TokenAuthorizerContext(
+        val type: String? = null,
+        val authorizationToken: String? = null,
+        val methodArn: String? = null
+    )
 }
